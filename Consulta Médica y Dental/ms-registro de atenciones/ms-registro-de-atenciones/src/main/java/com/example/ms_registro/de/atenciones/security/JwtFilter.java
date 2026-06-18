@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.security;
+package com.example.ms_registro.de.atenciones.security;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,16 +1,16 @@
-package com.example.ms_registros.de.atenciones.controller;
+package com.example.ms_registro.de.atenciones.controller;
 
 import java.util.List;
 
-import org.springframework.hateoas.EntityModel;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.ms_registros.de.atenciones.dto.ApiResponse;
-import com.example.ms_registros.de.atenciones.dto.RegistroAtencionesDTO;
-import com.example.ms_registros.de.atenciones.dto.RegistroAtencionesResponse;
-import com.example.ms_registros.de.atenciones.service.RegistroAtencionesService;
+import com.example.ms_registro.de.atenciones.dto.ApiResponse;
+import com.example.ms_registro.de.atenciones.dto.RegistroAtencionesDTO;
+import com.example.ms_registro.de.atenciones.dto.RegistroAtencionesResponse;
+import com.example.ms_registro.de.atenciones.service.RegistroAtencionesService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

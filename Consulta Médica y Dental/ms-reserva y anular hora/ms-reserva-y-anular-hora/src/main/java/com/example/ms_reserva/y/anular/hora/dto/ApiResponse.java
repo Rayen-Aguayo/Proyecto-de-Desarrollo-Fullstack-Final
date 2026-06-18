@@ -1,4 +1,4 @@
-package com.example.ms_reservar.y.anular.hora.dto;
+package com.example.ms_reserva.y.anular.hora.dto;
 
 import lombok.*;
 

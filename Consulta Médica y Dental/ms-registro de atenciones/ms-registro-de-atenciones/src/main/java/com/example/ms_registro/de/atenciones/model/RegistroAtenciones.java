@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.model;
+package com.example.ms_registro.de.atenciones.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

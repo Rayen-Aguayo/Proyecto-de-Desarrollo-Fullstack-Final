@@ -1,7 +1,6 @@
-package com.example.ms_reservar.y.anular.hora.config;
+package com.example.ms_reserva.y.anular.hora.config;
 
 import org.springframework.context.annotation.*;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class WebClientConfig {

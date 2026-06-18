@@ -1,15 +1,15 @@
-package com.example.ms_reservar.y.anular.hora.service;
+package com.example.ms_reserva.y.anular.hora.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.ms_reservar.y.anular.hora.client.MedicoClient;
-import com.example.ms_reservar.y.anular.hora.client.PacienteClient;
-import com.example.ms_reservar.y.anular.hora.dto.PedirHoraDTO;
-import com.example.ms_reservar.y.anular.hora.dto.PedirHoraResponse;
-import com.example.ms_reservar.y.anular.hora.model.PedirHora;
-import com.example.ms_reservar.y.anular.hora.repository.PedirHoraRepository;
+import com.example.ms_reserva.y.anular.hora.client.MedicoClient;
+import com.example.ms_reserva.y.anular.hora.client.PacienteClient;
+import com.example.ms_reserva.y.anular.hora.dto.PedirHoraDTO;
+import com.example.ms_reserva.y.anular.hora.dto.PedirHoraResponse;
+import com.example.ms_reserva.y.anular.hora.model.PedirHora;
+import com.example.ms_reserva.y.anular.hora.repository.PedirHoraRepository;
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
 

@@ -1,6 +1,4 @@
-package com.example.ms_reservar.y.anular.hora.model;
-
-
+package com.example.ms_reserva.y.anular.hora.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

@@ -1,9 +1,9 @@
-package com.example.ms_reservar.y.anular.hora.exception;
+package com.example.ms_reserva.y.anular.hora.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.ms_reservar.y.anular.hora.dto.ApiResponse;
+import com.example.ms_reserva.y.anular.hora.dto.ApiResponse;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.util.*;
