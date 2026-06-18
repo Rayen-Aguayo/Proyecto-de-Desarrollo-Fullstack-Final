@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.client;
+package com.example.ms_registro.de.atenciones.client;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;

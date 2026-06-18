@@ -1,4 +1,4 @@
-package com.example.ms_reservar.y.anular.hora.security;
+package com.example.ms_reserva.y.anular.hora.security;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.example.ms_reservar.y.anular.hora.config;
+package com.example.ms_reserva.y.anular.hora.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

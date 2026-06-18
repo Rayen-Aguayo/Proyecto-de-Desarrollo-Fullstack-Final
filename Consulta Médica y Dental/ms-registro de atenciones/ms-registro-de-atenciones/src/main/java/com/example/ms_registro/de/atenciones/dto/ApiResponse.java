@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.dto;
+package com.example.ms_registro.de.atenciones.dto;
 
 import lombok.*;
 

@@ -1,9 +1,9 @@
-package com.example.ms_registros.de.atenciones.exception;
+package com.example.ms_registro.de.atenciones.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.ms_registros.de.atenciones.dto.ApiResponse;
+import com.example.ms_registro.de.atenciones.dto.ApiResponse;
 
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import java.util.*;

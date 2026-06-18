@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.config;
+package com.example.ms_registro.de.atenciones.config;
 
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;

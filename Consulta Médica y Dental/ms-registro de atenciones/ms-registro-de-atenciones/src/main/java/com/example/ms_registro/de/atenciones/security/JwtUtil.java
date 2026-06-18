@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.security;
+package com.example.ms_registro.de.atenciones.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

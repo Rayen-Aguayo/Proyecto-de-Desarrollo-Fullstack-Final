@@ -1,4 +1,4 @@
-package com.example.ms_registros.de.atenciones.config;
+package com.example.ms_registro.de.atenciones.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
