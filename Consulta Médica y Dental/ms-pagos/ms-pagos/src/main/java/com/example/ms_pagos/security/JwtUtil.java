@@ -1,4 +1,4 @@
-package com.example.ms_reserva.y.anular.hora.security;
+package com.example.ms_pagos.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
