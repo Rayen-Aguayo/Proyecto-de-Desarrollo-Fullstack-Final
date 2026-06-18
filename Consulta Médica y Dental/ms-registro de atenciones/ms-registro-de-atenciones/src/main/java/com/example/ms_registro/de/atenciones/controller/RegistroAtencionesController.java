@@ -2,7 +2,7 @@ package com.example.ms_registro.de.atenciones.controller;
 
 import java.util.List;
 
-
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
