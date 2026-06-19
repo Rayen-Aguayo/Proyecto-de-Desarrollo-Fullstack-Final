@@ -39,7 +39,6 @@ public class FichaMedicaController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado (Se requiere rol ADMIN)")
     })
-    
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<FichaMedicaResponse>> crear(
@@ -64,7 +63,6 @@ public class FichaMedicaController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado (Se requiere rol ADMIN)")
     })
-
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<FichaMedicaResponse>>> listar(
@@ -89,43 +87,20 @@ public class FichaMedicaController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Ficha médica no encontrada")
     })
-
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<FichaMedicaResponse>> obtener(
             @Parameter(description = "Identificador único de la ficha médica", example = "1")
-            @PathVariable Long id, 
+            @PathVariable Long id,
             @RequestHeader("Authorization") String token) {
-        
-        FichaMedicaResponse FichaMedica = fichaMedicaService.obtener(id, token);
 
-        EntityModel<FichaMedicaResponse> recurso = EntityModel.of(FichaMedica);
+        FichaMedicaResponse fichaMedica = fichaMedicaService.obtener(id, token);
 
-
-           recurso.add(
-            linkTo(methodOn(FichaMedicaController.class).obtener(id, token))
-                    .withSelfRel()
-        );
-
-        recurso.add(
-                linkTo(methodOn(FichaMedicaController.class).listar(token))
-                        .withRel("all")
-        );
-
-        recurso.add(
-                linkTo(methodOn(FichaMedicaController.class).actualizar(id, null, token))
-                        .withRel("update")
-        );
-
-        recurso.add(
-                linkTo(methodOn(FichaMedicaController.class).eliminar(id))
-                        .withRel("delete")
-        );
-        
         return ResponseEntity.ok(
                 ApiResponse.<FichaMedicaResponse>builder()
                         .success(true)
-                        .data(fichaMedicaService.obtener(id, token))
+                        .message("Ficha médica encontrada")
+                        .data(fichaMedica)
                         .build()
         );
     }
@@ -141,7 +116,6 @@ public class FichaMedicaController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Ficha médica no encontrada")
     })
-
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<FichaMedicaResponse>> actualizar(
@@ -153,7 +127,7 @@ public class FichaMedicaController {
         return ResponseEntity.ok(
                 ApiResponse.<FichaMedicaResponse>builder()
                         .success(true)
-                        .message("Se cambió la hora")
+                        .message("Se actualizó la ficha médica")
                         .data(fichaMedicaService.actualizar(id, dto, token))
                         .build()
         );
@@ -161,7 +135,7 @@ public class FichaMedicaController {
 
     @Operation(
             summary = "Eliminar ficha médica por ID",
-            description = "Elimina o deja sin efecto una ficha médica del sistema. Requiere rol USER o ADMIN."
+            description = "Elimina una ficha médica del sistema. Requiere rol USER o ADMIN."
     )
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Ficha médica eliminada con éxito"),
@@ -169,18 +143,18 @@ public class FichaMedicaController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Ficha médica no encontrada")
     })
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<Void>> eliminar(
             @Parameter(description = "Identificador único de la ficha médica", example = "1")
             @PathVariable Long id) {
+
         fichaMedicaService.eliminar(id);
-        
+
         return ResponseEntity.status(200).body(
                 ApiResponse.<Void>builder()
                         .success(true)
-                        .message("Se anuló la hora")
+                        .message("Se eliminó la ficha médica")
                         .build()
         );
     }
