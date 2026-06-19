@@ -1,12 +1,10 @@
-package com.example.ms_facturacion.y.presupuesto.Controller;
+package test.java.com.example.ms_opinion.del.paciente.controller;
 
 
-import com.example.ms_facturacion.y.presupuesto.dto.FacturacionYPresupuestoDTO;
-import com.example.ms_facturacion.y.presupuesto.dto.FacturacionYPresupuestoResponse;
-import com.example.ms_facturacion.y.presupuesto.dto.MedicoResponse;
-import com.example.ms_facturacion.y.presupuesto.dto.PacienteResponse;
-import com.example.ms_facturacion.y.presupuesto.security.JwtUtil;
-import com.example.ms_facturacion.y.presupuesto.service.FacturacionYPresupuestoService;
+import com.example.ms_ficha.medica.dto.PacienteResponse;
+import com.example.ms_opinion.del.paciente.dto.OpinionPacienteDTO;
+import com.example.ms_opinion.del.paciente.dto.OpinionPacienteResponse;
+import com.example.ms_opinion.del.paciente.service.OpinionPacienteService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
@@ -18,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -26,40 +24,40 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(FacturacionYPresupuestoController.class)
+@WebMvcTest(RecetaMedicaController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-public class FacturacionYPresupuestoController {
-
+public class OpinionPacienteControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private FacturacionYPresupuestoService service;
+    private OpinionPacienteService Service;
 
     @MockitoBean
     private JwtUtil jwtUtil;
 
     @Test
-    void debeListarFacturacionYPresupuesto() throws Exception {
+    void debeListarOpinionPaciente() throws Exception {
         PacienteResponse paciente = new PacienteResponse();
         paciente.setRunPaciente("11111111-1");
-        paciente.setNombrePaciente("Juan Pérez");
 
         MedicoResponse medico = new MedicoResponse();
         medico.setRunMedico("22222222-2");
         medico.setNombreMedico("Dra. Soto");
 
-        FacturacionYPresupuestoResponse response = FacturacionYPresupuestoResponse.builder()
+        OpinionPacienteResponse response = OpinionPacienteResponse.builder()
                 .id(1L)
-                .presupuesto(30.000)
-                .paciente(paciente)
-                .medico(medico)
-                .tratamiento("tratamiento")
-                .diasDuracion(8)
-                .gestionPagos("gestion pagos")
-                .build();
+            .runPaciente("11111111-1")
+            .runMedico("22222222-2")
+            .nombreMedico("Dra. Soto")
+            .atencionMedico(8)
+            .expliqueSuPuntuacion("muy amable")
+            .explicacionTratamiento("bastante claro")
+            .comentarioMejora("comentario")
+            .puntuacionMedico(8)
+            .build();
 
         when(service.listar(anyString())).thenReturn(List.of(response));
 
@@ -68,30 +66,30 @@ public class FacturacionYPresupuestoController {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].id").value(1))
-                .andExpect(jsonPath("$.data[0].atencion").value("facturacio y presupuesto"))
-                .andExpect(jsonPath("$.data[0].paciente.nombrePaciente").value("Juan Pérez"))
+                .andExpect(jsonPath("$.data[0].paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data[0].medico.nombreMedico").value("Dra. Soto"));
     }
 
     @Test
-    void debeObtenerFacturacionYPresupuestoPorId() throws Exception {
+    void debeObtenerOpinionPacientePorId() throws Exception {
         PacienteResponse paciente = new PacienteResponse();
         paciente.setRunPaciente("11111111-1");
-        paciente.setNombrePaciente("Juan Pérez");
 
         MedicoResponse medico = new MedicoResponse();
         medico.setRunMedico("22222222-2");
         medico.setNombreMedico("Dra. Soto");
        
 
-        FacturacionYPresupuestoResponse response = FacturacionYPresupuestoResponse.builder()
+        OpinionPacienteResponse response = OpinionPacienteResponse.builder()
                 .id(1L)
-                .presupuesto(30.000)
-                .paciente(paciente)
-                .medico(medico)
-                .tratamiento("tratamiento")
-                .diasDuracion(8)
-                .gestionPagos("gestion pagos")
+                .runPaciente("11111111-1")
+                .runMedico("22222222-2")
+                .nombreMedico("Dra. Soto")
+                .atencionMedico(8)
+                .expliqueSuPuntuacion("muy amable")
+                .explicacionTratamiento("bastante claro")
+                .comentarioMejora("comentario")
+                .puntuacionMedico(8)
                 .build();
 
         when(service.obtener(eq(1L), anyString())).thenReturn(response);
@@ -101,44 +99,45 @@ public class FacturacionYPresupuestoController {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value(1))
-                .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"))
+                .andExpect(jsonPath("$.data.paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"));
     }
 
     @Test
-    void debeCrearFacturacionYPresupuesto() throws Exception {
+    void debeCrearOpinionPaciente() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
-        FacturacionYPresupuestoDTO dto = new FacturacionYPresupuestoDTO();
-        dto.setPresupuesto(30.000);
-        dto.setRunPaciente("11111111-1");
-        dto.setNombrePaciente("Juan Pérez");
-        dto.setRunMedico("22222222-2");
-        dto.setNombreMedico("Dra. Soto");
-        dto.setTratamiento("tratamiento");
-        dto.setDiasDuracion(8);
-        dto.setGestionPagos("gestion pagos");
+        OpinionPacienteDTO dto = new OpinionPacienteDTO();
+            dto.setRunPaciente("11111111-1");
+            dto.setRunMedico("22222222-2");
+            dto.setNombreMedico("Dra. Soto");
+            dto.setAtencionMedico(8);
+            dto.setExpliqueSuPuntuacion("muy amable");
+            dto.setExplicacionTratamiento("bastante claro");
+            dto.setComentarioMejora("comentario");
+            dto.setPuntuacionMedico(8);
 
         PacienteResponse paciente = new PacienteResponse();
         paciente.setRunPaciente("11111111-1");
-        paciente.setNombrePaciente("Juan Pérez");
 
         MedicoResponse medico = new MedicoResponse();
         medico.setRunMedico("22222222-2");
         medico.setNombreMedico("Dra. Soto");
 
-        FacturacionYPresupuestoResponse response = FacturacionYPresupuestoResponse.builder()
+        OpinionPacienteResponse response = OpinionPacienteResponse.builder()
                 .id(1L)
-                .presupuesto(30.000)
-                .paciente(paciente)
-                .medico(medico)
-                .tratamiento("tratamiento")
-                .diasDuracion(8)
-                .gestionPagos("gestion pagos")
+                .runPaciente("11111111-1")
+                .runMedico("22222222-2")
+                .nombreMedico("Dra. Soto")
+                .atencionMedico(8)
+                .expliqueSuPuntuacion("muy amable")
+                .explicacionTratamiento("bastante claro")
+                .comentarioMejora("comentario")
+                .puntuacionMedico(8)
                 .build();
 
-        when(service.crear(any(FacturacionYPresupuestoDTO.class), anyString())).thenReturn(response);
+        when(service.crear(any(OpinionPacienteDTO.class), anyString())).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/facturacio-y-presupuesto")
                         .header("Authorization", "Bearer token-de-prueba")
@@ -148,44 +147,45 @@ public class FacturacionYPresupuestoController {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("se creo un facturacio y presupuesto"))
                 .andExpect(jsonPath("$.data.id").value(1))
-                .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"))
+                .andExpect(jsonPath("$.data.paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"));
     }
 
     @Test
-    void debeActualizarFacturacionYPresupuesto() throws Exception {
+    void debeActualizarOpinionPaciente() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
-        FacturacionYPresupuestoDTO dto = new FacturacionYPresupuestoDTO();
-        dto.setPresupuesto(30.000);
-        dto.setRunPaciente("11111111-1");
-        dto.setNombrePaciente("Juan Pérez");
-        dto.setRunMedico("22222222-2");
-        dto.setNombreMedico("Dra. Soto");
-        dto.setTratamiento("tratamiento");
-        dto.setDiasDuracion(8);
-        dto.setGestionPagos("gestion pagos");
+        OpinionPacienteDTO dto = new OpinionPacienteDTO();
+            dto.setRunPaciente("11111111-1");
+            dto.setRunMedico("22222222-2");
+            dto.setNombreMedico("Dra. Soto");
+            dto.setAtencionMedico(8);
+            dto.setExpliqueSuPuntuacion("muy amable");
+            dto.setExplicacionTratamiento("bastante claro");
+            dto.setComentarioMejora("comentario");
+            dto.setPuntuacionMedico(8);
 
         PacienteResponse paciente = new PacienteResponse();
         paciente.setRunPaciente("11111111-1");
-        paciente.setNombrePaciente("Juan Pérez");
 
         MedicoResponse medico = new MedicoResponse();
         medico.setRunMedico("22222222-2");
         medico.setNombreMedico("Dra. Soto");
 
-        FacturacionYPresupuestoResponse response = FacturacionYPresupuestoResponse.builder()
+        OpinionPacienteResponse response = OpinionPacienteResponse.builder()
                 .id(1L)
-                .presupuesto(30.000)
-                .paciente(paciente)
-                .medico(medico)
-                .tratamiento("tratamiento")
-                .diasDuracion(8)
-                .gestionPagos("gestion pagos")
+                .runPaciente("11111111-1")
+                .runMedico("22222222-2")
+                .nombreMedico("Dra. Soto")
+                .atencionMedico(8)
+                .expliqueSuPuntuacion("muy amable")
+                .explicacionTratamiento("bastante claro")
+                .comentarioMejora("comentario")
+                .puntuacionMedico(8)
                 .build();
 
-        when(service.actualizar(eq(1L), any(FacturacionYPresupuestoDTO.class), anyString()))
+        when(service.actualizar(eq(1L), any(OpinionPacienteDTO.class), anyString()))
                 .thenReturn(response);
 
         mockMvc.perform(put("/api/v1/facturacio-y-presupuesto/1")
@@ -195,16 +195,16 @@ public class FacturacionYPresupuestoController {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("se actualizo facturacio y presupuesto"))
-                .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"));
+                .andExpect(jsonPath("$.data.paciente.runPaciente").value("11111111-1"));
     }
 
     @Test
-    void debeEliminarFacturacionYPresupuesto() throws Exception {
+    void debeEliminarOpinionPaciente() throws Exception {
         doNothing().when(service).eliminar(1L);
 
         mockMvc.perform(delete("/api/v1/facturacio-y-presupuesto/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("se elimino facturacio y presupuesto"));
+                .andExpect(jsonPath("$.message").value("se elimino opinion del paciente"));
     }
 }
