@@ -197,4 +197,90 @@ class PagosControllerTest {
                 .andExpect(jsonPath("$.data.estado").value("PENDIENTE"))
                 .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"));
     }
+
+    @Test
+    void debeRetornar404AlObtenerPagoInexistente() throws Exception {
+        when(pagosService.obtener(eq(999L), anyString()))
+                .thenThrow(new RuntimeException("Pago no encontrado"));
+
+        mockMvc.perform(get("/api/v1/pagos/999")
+                        .header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Pago no encontrado"));
+    }
+
+    @Test
+    void debeRetornar404AlActualizarPagoInexistente() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        PagosDTO dto = new PagosDTO();
+        dto.setRunPaciente("11111111-1");
+        dto.setNombrePaciente("Juan Pérez");
+        dto.setFecha(LocalDate.of(2026, 6, 25));
+        dto.setHora(LocalTime.of(11, 0));
+        dto.setMetodoPago("Efectivo");
+        dto.setNroBoleta(1002);
+        dto.setRegistroFacturacion("FAC-002");
+        dto.setNeto(42017.0);
+        dto.setIva(7983.0);
+        dto.setTotal(50000.0);
+        dto.setEstado("PENDIENTE");
+
+        when(pagosService.actualizar(eq(999L), any(PagosDTO.class), anyString()))
+                .thenThrow(new RuntimeException("Pago no encontrado"));
+
+        mockMvc.perform(put("/api/v1/pagos/999")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Pago no encontrado"));
+    }
+
+    @Test
+    void debeRetornar400AlCrearPagoConCamposNulos() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        PagosDTO dto = new PagosDTO();
+
+        mockMvc.perform(post("/api/v1/pagos")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Validación fallida"));
+    }
+
+    @Test
+    void debeRetornar400AlActualizarPagoConCamposNulos() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        // DTO vacío — todos los @NotBlank/@NotNull fallarán
+        PagosDTO dto = new PagosDTO();
+
+        mockMvc.perform(put("/api/v1/pagos/1")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Validación fallida"));
+    }
+
+    @Test
+    void debeRetornarListaVaciaAlNoHaberPagos() throws Exception {
+        when(pagosService.listar(anyString())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/pagos")
+                        .header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
 }

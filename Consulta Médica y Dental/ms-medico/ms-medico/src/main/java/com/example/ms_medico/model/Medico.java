@@ -22,4 +22,8 @@ public class Medico {
     private String nroTelefono;
     private String especialidad;
     private String firmaMedico;
+    public String getRunPaciente() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getRunPaciente'");
+    }
 }

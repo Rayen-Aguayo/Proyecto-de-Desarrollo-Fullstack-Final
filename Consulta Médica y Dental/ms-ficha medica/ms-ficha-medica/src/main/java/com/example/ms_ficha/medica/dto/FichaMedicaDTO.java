@@ -1,5 +1,8 @@
 package com.example.ms_ficha.medica.dto;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,4 +38,14 @@ public class FichaMedicaDTO {
 
     @NotBlank(message = "El odontograma es obligatorio para saber que dientes estan malos")
     private String odontograma;
+
+    public void setFecha(LocalDate of) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setFecha'");
+    }
+
+    public void setHoraDeAtencion(LocalTime of) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'setHoraDeAtencion'");
+    }
 }

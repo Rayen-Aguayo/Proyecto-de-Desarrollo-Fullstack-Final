@@ -1,11 +1,10 @@
 package com.example.ms_paciente.controller;
 
-
 import com.example.ms_paciente.dto.PacienteDTO;
 import com.example.ms_paciente.model.Paciente;
+import com.example.ms_paciente.security.JwtUtil;
 import com.example.ms_paciente.service.PacienteService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,8 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -24,7 +21,8 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(PedirHoraController.class)
+
+@WebMvcTest(PacienteController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class PacienteControllerTest {
@@ -32,10 +30,13 @@ public class PacienteControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    // CORRECCIÓN 2: objectMapper se usaba sin declarar — se agrega aquí
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @MockitoBean
     private PacienteService service;
 
-    
     @MockitoBean
     private JwtUtil jwtUtil;
 
@@ -43,10 +44,9 @@ public class PacienteControllerTest {
     void debeListarPacientes() throws Exception {
         List<Paciente> pacientes = List.of(
                 new Paciente("11111111-1", "paciente", "datos del paciente",
-            28,"alergias","enfermedad",
-            "medicamento","123456789"
-        ));
-
+                        28, "alergias", "enfermedad",
+                        "medicamento", "123456789")
+        );
 
         when(service.listar()).thenReturn(pacientes);
 
@@ -54,24 +54,23 @@ public class PacienteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Listado obtenido"))
-                .andExpect(jsonPath("$.data[0].run").value("11111111-1"))
-                .andExpect(jsonPath("$.data[0].nombre").value("paciente"))
-                .andExpect(jsonPath("$.data[0].datos").value(28))
-                .andExpect(jsonPath("$.data[0].edad").value("datos del paciente"))
+                // CORRECCIÓN 3: los jsonPath estaban cruzados (datos↔edad invertidos)
+                .andExpect(jsonPath("$.data[0].runPaciente").value("11111111-1"))
+                .andExpect(jsonPath("$.data[0].nombrePaciente").value("paciente"))
+                .andExpect(jsonPath("$.data[0].datosDelPaciente").value("datos del paciente"))
+                .andExpect(jsonPath("$.data[0].edadPaciente").value(28))
                 .andExpect(jsonPath("$.data[0].alergias").value("alergias"))
                 .andExpect(jsonPath("$.data[0].enfermedad").value("enfermedad"))
                 .andExpect(jsonPath("$.data[0].queMedicamentoEstaTomando").value("medicamento"))
                 .andExpect(jsonPath("$.data[0].nroTelefono").value("123456789"));
-
     }
 
     @Test
     void debeObtenerPacientePorId() throws Exception {
         Paciente paciente = new Paciente("11111111-1", "paciente", "datos del paciente",
-            28,"alergias","enfermedad",
-            "medicamento","123456789"
+                28, "alergias", "enfermedad",
+                "medicamento", "123456789"
         );
-
 
         when(service.obtener("11111111-1")).thenReturn(paciente);
 
@@ -79,34 +78,33 @@ public class PacienteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Paciente obtenido"))
-                .andExpect(jsonPath("$.data[0].run").value("11111111-1"))
-                .andExpect(jsonPath("$.data[0].nombre").value("paciente"))
-                .andExpect(jsonPath("$.data[0].datos").value(28))
-                .andExpect(jsonPath("$.data[0].edad").value("datos del paciente"))
-                .andExpect(jsonPath("$.data[0].alergias").value("alergias"))
-                .andExpect(jsonPath("$.data[0].enfermedad").value("enfermedad"))
-                .andExpect(jsonPath("$.data[0].queMedicamentoEstaTomando").value("medicamento"))
-                .andExpect(jsonPath("$.data[0].nroTelefono").value("123456789"));
+                // CORRECCIÓN 4: obtener por ID devuelve objeto único, no array → $.data (no $.data[0])
+                .andExpect(jsonPath("$.data.runPaciente").value("11111111-1"))
+                .andExpect(jsonPath("$.data.nombrePaciente").value("paciente"))
+                .andExpect(jsonPath("$.data.datosDelPaciente").value("datos del paciente"))
+                .andExpect(jsonPath("$.data.edadPaciente").value(28))
+                .andExpect(jsonPath("$.data.alergias").value("alergias"))
+                .andExpect(jsonPath("$.data.enfermedad").value("enfermedad"))
+                .andExpect(jsonPath("$.data.queMedicamentoEstaTomando").value("medicamento"))
+                .andExpect(jsonPath("$.data.nroTelefono").value("123456789"));
     }
 
     @Test
     void debeCrearPaciente() throws Exception {
         PacienteDTO dto = new PacienteDTO();
-
         dto.setRunPaciente("11111111-1");
         dto.setNombrePaciente("paciente");
         dto.setDatosDelPaciente("datos del paciente");
         dto.setEdadPaciente(28);
-        dto.setAlergias("alergias"); 
-        dto.setEnfermedad("enfermedad"); 
-        dto.setQueMedicamentoEstaTomando("medicamento"); 
+        dto.setAlergias("alergias");
+        dto.setEnfermedad("enfermedad");
+        dto.setQueMedicamentoEstaTomando("medicamento");
         dto.setNroTelefono("123456789");
 
         Paciente creado = new Paciente("11111111-1", "paciente", "datos del paciente",
-            28,"alergias","enfermedad",
-            "medicamento","123456789"
+                28, "alergias", "enfermedad",
+                "medicamento", "123456789"
         );
-
 
         when(service.crear(any(PacienteDTO.class))).thenReturn(creado);
 
@@ -116,14 +114,14 @@ public class PacienteControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Paciente creado"))
-                .andExpect(jsonPath("$.data[0].run").value("11111111-1"))
-                .andExpect(jsonPath("$.data[0].nombre").value("paciente"))
-                .andExpect(jsonPath("$.data[0].datos").value(28))
-                .andExpect(jsonPath("$.data[0].edad").value("datos del paciente"))
-                .andExpect(jsonPath("$.data[0].alergias").value("alergias"))
-                .andExpect(jsonPath("$.data[0].enfermedad").value("enfermedad"))
-                .andExpect(jsonPath("$.data[0].queMedicamentoEstaTomando").value("medicamento"))
-                .andExpect(jsonPath("$.data[0].nroTelefono").value("123456789"));
+                .andExpect(jsonPath("$.data.runPaciente").value("11111111-1"))
+                .andExpect(jsonPath("$.data.nombrePaciente").value("paciente"))
+                .andExpect(jsonPath("$.data.datosDelPaciente").value("datos del paciente"))
+                .andExpect(jsonPath("$.data.edadPaciente").value(28))
+                .andExpect(jsonPath("$.data.alergias").value("alergias"))
+                .andExpect(jsonPath("$.data.enfermedad").value("enfermedad"))
+                .andExpect(jsonPath("$.data.queMedicamentoEstaTomando").value("medicamento"))
+                .andExpect(jsonPath("$.data.nroTelefono").value("123456789"));
     }
 
     @Test
@@ -133,16 +131,15 @@ public class PacienteControllerTest {
         dto.setNombrePaciente("paciente");
         dto.setDatosDelPaciente("datos del paciente");
         dto.setEdadPaciente(28);
-        dto.setAlergias("alergias"); 
-        dto.setEnfermedad("enfermedad"); 
-        dto.setQueMedicamentoEstaTomando("medicamento"); 
+        dto.setAlergias("alergias");
+        dto.setEnfermedad("enfermedad");
+        dto.setQueMedicamentoEstaTomando("medicamento");
         dto.setNroTelefono("123456789");
 
         Paciente actualizado = new Paciente("11111111-1", "paciente", "datos del paciente",
-            28,"alergias","enfermedad",
-            "medicamento","123456789"
+                28, "alergias", "enfermedad",
+                "medicamento", "123456789"
         );
-
 
         when(service.actualizar(eq("11111111-1"), any(PacienteDTO.class))).thenReturn(actualizado);
 
@@ -152,14 +149,14 @@ public class PacienteControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Paciente actualizado"))
-                .andExpect(jsonPath("$.data[0].run").value("11111111-1"))
-                .andExpect(jsonPath("$.data[0].nombre").value("paciente"))
-                .andExpect(jsonPath("$.data[0].datos").value(28))
-                .andExpect(jsonPath("$.data[0].edad").value("datos del paciente"))
-                .andExpect(jsonPath("$.data[0].alergias").value("alergias"))
-                .andExpect(jsonPath("$.data[0].enfermedad").value("enfermedad"))
-                .andExpect(jsonPath("$.data[0].queMedicamentoEstaTomando").value("medicamento"))
-                .andExpect(jsonPath("$.data[0].nroTelefono").value("123456789"));
+                .andExpect(jsonPath("$.data.runPaciente").value("11111111-1"))
+                .andExpect(jsonPath("$.data.nombrePaciente").value("paciente"))
+                .andExpect(jsonPath("$.data.datosDelPaciente").value("datos del paciente"))
+                .andExpect(jsonPath("$.data.edadPaciente").value(28))
+                .andExpect(jsonPath("$.data.alergias").value("alergias"))
+                .andExpect(jsonPath("$.data.enfermedad").value("enfermedad"))
+                .andExpect(jsonPath("$.data.queMedicamentoEstaTomando").value("medicamento"))
+                .andExpect(jsonPath("$.data.nroTelefono").value("123456789"));
     }
 
     @Test
@@ -172,4 +169,3 @@ public class PacienteControllerTest {
                 .andExpect(jsonPath("$.message").value("Paciente eliminado"));
     }
 }
-

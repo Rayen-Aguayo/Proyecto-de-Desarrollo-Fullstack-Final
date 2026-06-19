@@ -1,7 +1,6 @@
-package test.java.com.example.ms_medico.repository;
+package com.example.ms_medico.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +11,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import com.example.ms_medico.model.Medico;
-import com.example.ms_paciente.model.Paciente;
 
 
 @DataJpaTest

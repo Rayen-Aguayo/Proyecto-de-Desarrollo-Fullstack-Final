@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builderpublic Object queMedicamentoEstaTomando(String queMedicamentoEstaTomando) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'queMedicamentoEstaTomando'");
+    }
 public class FichaMedicaResponse {
     private Long id;
 
@@ -16,5 +19,13 @@ public class FichaMedicaResponse {
     private MedicoResponse medico;
     private String procedimiento;
     private String odontograma;
+    public Object getQueMedicamentoEstaTomando() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getQueMedicamentoEstaTomando'");
+    }
+    public static Object builder() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'builder'");
+    }
 }
 

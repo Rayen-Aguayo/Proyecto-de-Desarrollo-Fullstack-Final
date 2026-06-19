@@ -45,10 +45,16 @@ public class FichaMedicaServiceTest {
     String tokenDePrueba = "Bearer token-prueba";
 
     FichaMedica fichaMedica = new FichaMedica(
-        1L, "paciente","11111111-1",
-         "medico","22222222-2","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma");
+        1L, 
+        "11111111-1",
+        "paciente",
+        "22222222-2",
+        "medico",
+        "procedimiento",
+        "queMedicamentoEstaTomando", 
+        "enfermedad",
+        "alergias",
+        "odontograma");
 
     when(repo.findById(1L)).thenReturn(Optional.of(fichaMedica));
 
@@ -115,10 +121,17 @@ void deberiaRetornarListaFichaMedica() {
     String tokenDePrueba = "Bearer token-prueba";
 
     FichaMedica fichaMedica = new FichaMedica( 
-        1L, "paciente","11111111-1",
-         "22222222-2","medico","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma");
+        1L, 
+        "11111111-1",
+        "paciente",
+        "22222222-2",
+        "medico",
+        "procedimiento",
+        "queMedicamentoEstaTomando", 
+        "enfermedad",
+        "alergias",
+        "odontograma"
+    );
 
     when(repo.findAll()).thenReturn(List.of(fichaMedica));
 
@@ -211,10 +224,17 @@ void deberiaCrearFichaMedicaCorrectamente() {
     when(medicoClient.getMedicoClient("22222222-2", tokenDePrueba)).thenReturn(medicoResponse);
 
     FichaMedica guardado = new FichaMedica( 
-        1L, "11111111-1", "paciente",
-        "22222222-2", "medico", "procedimiento",
-        "queMedicamentoEstaTomando", "enfermedad",
-        "alergias", "odontograma");
+        1L, 
+        "11111111-1", 
+        "paciente",
+        "22222222-2", 
+        "medico", 
+        "procedimiento",
+        "queMedicamentoEstaTomando", 
+        "enfermedad",
+        "alergias", 
+        "odontograma"
+    );
     when(repo.save(any(FichaMedica.class))).thenReturn(guardado);
 
     // Act
@@ -288,10 +308,17 @@ void deberiaActualizarFichaMedicaCorrectamente() {
     String tokenDePrueba = "Bearer token-prueba";
 
     FichaMedica existente = new FichaMedica( 
-        1L, "11111111-1","paciente",
-         "22222222-2","medico","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma");
+        1L, 
+        "11111111-1",
+        "paciente",
+        "22222222-2",
+        "medico",
+        "procedimiento",
+        "queMedicamentoEstaTomando", 
+        "enfermedad",
+        "alergias",
+        "odontograma"
+    );
     
     PacienteResponse pacienteResponse = new PacienteResponse();
     pacienteResponse.setRunPaciente("11111111-1");
