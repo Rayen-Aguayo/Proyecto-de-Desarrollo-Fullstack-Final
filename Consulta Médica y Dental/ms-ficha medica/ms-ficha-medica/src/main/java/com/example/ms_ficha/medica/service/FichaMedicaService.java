@@ -30,19 +30,19 @@ public class FichaMedicaService {
 
         log.info("Creando ficha médica",
                 keyValue("paciente", dto.getRunPaciente()));
-        var paciente = pacienteClient.getPacienteClient(
-                dto.getRunPaciente(),
-                token);
 
+        var paciente = pacienteClient.getPacienteClient(dto.getRunPaciente(), token);
         if (paciente == null) {
-            throw new RuntimeException("El paciente no existe no se puede crear la Ficha medica");
+            log.warn("Paciente no encontrado al crear ficha médica",
+                    keyValue("paciente", dto.getRunPaciente()));
+            throw new EntityNotFoundException("El paciente no existe, no se puede crear la Ficha médica");
         }
-        var medico = medicoClient.getMedicoClient(
-                dto.getRunMedico(),
-                token);
 
+        var medico = medicoClient.getMedicoClient(dto.getRunMedico(), token);
         if (medico == null) {
-            throw new RuntimeException("El médico no existe no se puede crear la Ficha medica");
+            log.warn("Médico no encontrado al crear ficha médica",
+                    keyValue("medico", dto.getRunMedico()));
+            throw new EntityNotFoundException("El médico no existe, no se puede crear la Ficha médica");
         }
 
         FichaMedica fichaMedica = fichaMedicaRepository.save(
@@ -57,6 +57,10 @@ public class FichaMedicaService {
                         dto.getEnfermedad(),
                         dto.getAlergias(),
                         dto.getOdontograma()));
+
+        log.info("Ficha médica creada",
+                keyValue("id", fichaMedica.getId()));
+
         return mapToResponse(fichaMedica, token);
     }
 
@@ -80,11 +84,16 @@ public class FichaMedicaService {
 
         var paciente = pacienteClient.getPacienteClient(dto.getRunPaciente(), token);
         if (paciente == null) {
-            throw new RuntimeException("El paciente no existe");
+            log.warn("Paciente no encontrado al actualizar ficha médica",
+                    keyValue("paciente", dto.getRunPaciente()));
+            throw new EntityNotFoundException("El paciente no existe");
         }
+
         var medico = medicoClient.getMedicoClient(dto.getRunMedico(), token);
         if (medico == null) {
-            throw new RuntimeException("El médico no existe");
+            log.warn("Médico no encontrado al actualizar ficha médica",
+                    keyValue("medico", dto.getRunMedico()));
+            throw new EntityNotFoundException("El médico no existe");
         }
 
         ficha.setRunPaciente(dto.getRunPaciente());
@@ -97,26 +106,48 @@ public class FichaMedicaService {
         ficha.setAlergias(dto.getAlergias());
         ficha.setOdontograma(dto.getOdontograma());
 
-        return mapToResponse(fichaMedicaRepository.save(ficha), token);
+        FichaMedica actualizada = fichaMedicaRepository.save(ficha);
+
+        log.info("Ficha médica actualizada",
+                keyValue("id", actualizada.getId()));
+
+        return mapToResponse(actualizada, token);
     }
 
     public void eliminar(Long id) {
         FichaMedica fichaMedica = fichaMedicaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ficha médica no encontrada"));
         fichaMedicaRepository.delete(fichaMedica);
+        log.info("Ficha médica eliminada",
+                keyValue("id", id));
     }
 
     private FichaMedicaResponse mapToResponse(FichaMedica fichaMedica, String token) {
+
         var paciente = pacienteClient.getPacienteClient(fichaMedica.getRunPaciente(), token);
+        if (paciente == null) {
+            log.warn("Paciente asociado no encontrado al mapear ficha médica",
+                    keyValue("id", fichaMedica.getId()),
+                    keyValue("paciente", fichaMedica.getRunPaciente()));
+            throw new EntityNotFoundException("Paciente asociado a la ficha médica no encontrado");
+        }
+
         var medico = medicoClient.getMedicoClient(fichaMedica.getRunMedico(), token);
+        if (medico == null) {
+            log.warn("Médico asociado no encontrado al mapear ficha médica",
+                    keyValue("id", fichaMedica.getId()),
+                    keyValue("medico", fichaMedica.getRunMedico()));
+            throw new EntityNotFoundException("Médico asociado a la ficha médica no encontrado");
+        }
+
         return FichaMedicaResponse.builder()
                 .id(fichaMedica.getId())
                 .paciente(paciente)
                 .medico(medico)
                 .procedimiento(fichaMedica.getProcedimiento())
-                .queMedicamentoEstaTomando(paciente.getQueMedicamentoEstaTomando())
-                .enfermedad(paciente.getEnfermedad())
-                .alergias(paciente.getAlergias())
+                .queMedicamentoEstaTomando(fichaMedica.getQueMedicamentoEstaTomando())
+                .enfermedad(fichaMedica.getEnfermedad())
+                .alergias(fichaMedica.getAlergias())
                 .odontograma(fichaMedica.getOdontograma())
                 .build();
     }

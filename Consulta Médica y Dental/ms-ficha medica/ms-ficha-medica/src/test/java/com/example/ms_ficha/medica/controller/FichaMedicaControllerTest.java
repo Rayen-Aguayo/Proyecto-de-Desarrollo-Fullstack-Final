@@ -1,4 +1,4 @@
-package com.example.ms_ficha.medica.controller;
+package test.java.com.example.ms_ficha.medica.controller;
 
 import com.example.ms_ficha.medica.dto.FichaMedicaDTO;
 import com.example.ms_ficha.medica.dto.FichaMedicaResponse;
@@ -77,13 +77,13 @@ public class FichaMedicaControllerTest {
 
     @Test
     void debeListarFichaMedica() throws Exception {
-        // CORRECCIÓN 3: se usaba "Service" (mayúscula) en when() — ahora "service"
         when(service.listar(anyString())).thenReturn(List.of(buildResponse()));
 
         mockMvc.perform(get("/api/v1/fichas_medicas")
                         .header("Authorization", "Bearer token-de-prueba"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Listado obtenido"))
                 .andExpect(jsonPath("$.data[0].id").value(1))
                 .andExpect(jsonPath("$.data[0].paciente.nombrePaciente").value("Juan Pérez"))
                 .andExpect(jsonPath("$.data[0].medico.nombreMedico").value("Dra. Soto"))
@@ -98,10 +98,13 @@ public class FichaMedicaControllerTest {
                         .header("Authorization", "Bearer token-de-prueba"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Ficha médica encontrada"))
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"))
                 .andExpect(jsonPath("$.data.procedimiento").value("procedimiento"));
+
+        verify(service, times(1)).obtener(eq(1L), anyString());
     }
 
     @Test
@@ -111,14 +114,13 @@ public class FichaMedicaControllerTest {
 
         when(service.crear(any(FichaMedicaDTO.class), anyString())).thenReturn(buildResponse());
 
-        // CORRECCIÓN 4: URL era "/api/v1/reservar-y-anular-hora" — debe ser la de ficha médica
         mockMvc.perform(post("/api/v1/fichas_medicas")
                         .header("Authorization", "Bearer token-de-prueba")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(buildDTO())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Se creo la ficha medica"))
+                .andExpect(jsonPath("$.message").value("Ficha médica creada"))
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"));
@@ -132,15 +134,13 @@ public class FichaMedicaControllerTest {
         when(service.actualizar(eq(1L), any(FichaMedicaDTO.class), anyString()))
                 .thenReturn(buildResponse());
 
-        // CORRECCIÓN 5: el DTO tenía campos que no existen en FichaMedicaDTO
-        // (setFecha, setHoraDeAtencion pertenecen a PedirHoraDTO — eliminados)
         mockMvc.perform(put("/api/v1/fichas_medicas/1")
                         .header("Authorization", "Bearer token-de-prueba")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(buildDTO())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Se actualizo la ficha medica"))
+                .andExpect(jsonPath("$.message").value("Se actualizó la ficha médica"))
                 .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"))
                 .andExpect(jsonPath("$.data.procedimiento").value("procedimiento"));
@@ -153,6 +153,6 @@ public class FichaMedicaControllerTest {
         mockMvc.perform(delete("/api/v1/fichas_medicas/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("se elimino la ficha medica"));
+                .andExpect(jsonPath("$.message").value("Se eliminó la ficha médica"));
     }
 }
