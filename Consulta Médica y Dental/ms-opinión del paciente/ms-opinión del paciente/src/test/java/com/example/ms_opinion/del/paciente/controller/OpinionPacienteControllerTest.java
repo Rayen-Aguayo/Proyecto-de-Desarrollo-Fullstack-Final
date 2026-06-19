@@ -105,7 +105,6 @@ public class OpinionPacienteControllerTest {
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"))
                 .andExpect(jsonPath("$.data.atencionMedico").value(8));
 
-        // El controller corregido llama al servicio una sola vez
         verify(service, times(1)).obtener(eq(1L), anyString());
     }
 
