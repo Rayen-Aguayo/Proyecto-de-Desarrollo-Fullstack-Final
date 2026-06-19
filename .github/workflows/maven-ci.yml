@@ -1,0 +1,28 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Descargar codigo del repositorio
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Ejecutar pruebas en la raiz o subcarpetas
+      run: |
+        # Si tus proyectos están dentro de una subcarpeta (ej. "Consulta Médica y Dental"), descomenta la línea de abajo cambiando el nombre:
+        # cd "Consulta Médica y Dental" && mvn clean test
+        mvn clean test
