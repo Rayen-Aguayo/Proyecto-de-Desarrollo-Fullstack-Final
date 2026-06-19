@@ -1,9 +1,7 @@
 package com.example.ms_pagos.dto;
 
-
 import java.time.LocalDate;
 import java.time.LocalTime;
-
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +13,7 @@ public class PagosDTO {
     private String runPaciente;  
     @NotBlank(message = "El nombre del paciente es obligatorio")
     private String nombrePaciente;
-    @NotBlank(message = "La fecha es obligatoria")
+    @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
     @NotNull(message = "La hora es obligatoria")
     private LocalTime hora;
@@ -29,10 +27,7 @@ public class PagosDTO {
     private Double neto;
     @NotNull(message = "El IVA es obligatorio")
     private Double iva;
-    
     private Double total; 
     @NotBlank(message = "El estado es obligatorio")
     private String estado; 
-
-
 }

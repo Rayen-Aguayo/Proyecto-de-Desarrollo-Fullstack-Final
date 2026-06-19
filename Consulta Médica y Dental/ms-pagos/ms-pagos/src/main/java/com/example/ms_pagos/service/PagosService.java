@@ -75,7 +75,7 @@ public class PagosService {
         }
 
         Pagos p = pagosRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("El pago no existe"));
+                .orElseThrow(() -> new EntityNotFoundException("Pago no encontrado"));
 
         p.setEstado(dto.getEstado());
 
