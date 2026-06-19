@@ -92,4 +92,9 @@ public class OpinionPacienteService {
                 .puntuacionMedico(opinion.getPuntuacionMedico())
                 .build();
     }
+
+    public Object actualizar(long eq, OpinionPacienteDTO any, String anyString) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'actualizar'");
+    }
 }

@@ -1,4 +1,4 @@
-package test.java.com.example.ms_ficha.medica.repository;
+package com.example.ms_ficha.medica.repository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,69 +21,93 @@ public class FichaMedicaRepositoryTest {
 
     @Test
     void debeGuardarFichaMedica() {
-    FichaMedica fichaMedica = new FichaMedica(
-        1L, "paciente","11111111-1",
-         "medico","22222222-2","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma");
+        FichaMedica fichaMedica = new FichaMedica(
+                null, 
+                "11111111-1", 
+                "paciente",
+                "22222222-2", 
+                "medico", 
+                "procedimiento",
+                "queMedicamentoEstaTomando", 
+                "enfermedad",
+                "alergias", 
+                "odontograma"
+            );
 
         FichaMedica guardado = repository.save(fichaMedica);
 
         assertNotNull(guardado.getId());
-
-    assertEquals("paciente", guardado.getNombrePaciente());
-    assertEquals("11111111-1", guardado.getRunPaciente());
-    assertEquals("alergias", guardado.getAlergias());
-    assertEquals("enfermedad", guardado.getEnfermedad());
-    assertEquals("queMedicamentoEstaTomando", guardado.getQueMedicamentoEstaTomando());
-
-    assertEquals("medico", guardado.getNombreMedico());
-    assertEquals("22222222-2", guardado.getRunMedico());
-
-    assertEquals("procedimiento", guardado.getProcedimiento());
-    assertEquals("odontograma", guardado.getOdontograma());
+        assertEquals("11111111-1", guardado.getRunPaciente());
+        assertEquals("paciente", guardado.getNombrePaciente());
+        assertEquals("22222222-2", guardado.getRunMedico());
+        assertEquals("medico", guardado.getNombreMedico());
+        assertEquals("procedimiento", guardado.getProcedimiento());
+        assertEquals("queMedicamentoEstaTomando", guardado.getQueMedicamentoEstaTomando());
+        assertEquals("enfermedad", guardado.getEnfermedad());
+        assertEquals("alergias", guardado.getAlergias());
+        assertEquals("odontograma", guardado.getOdontograma());
     }
 
     @Test
     void debeBuscarFichaMedicaPorId() {
-    FichaMedica fichaMedica = new FichaMedica(        
-         1L, "paciente","11111111-1",
-         "22222222","medico","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma");
-        
+        FichaMedica fichaMedica = new FichaMedica(
+                null, 
+                "11111111-1", 
+                "paciente",
+                "22222222-2", 
+                "medico", 
+                "procedimiento",
+                "queMedicamentoEstaTomando", 
+                "enfermedad",
+                "alergias", 
+                "odontograma"
+            );
+
         FichaMedica guardado = repository.save(fichaMedica);
 
         Optional<FichaMedica> resultado = repository.findById(guardado.getId());
 
         assertTrue(resultado.isPresent());
-    assertEquals("paciente", resultado.get().getNombrePaciente());
-    assertEquals("11111111-1", resultado.get().getRunPaciente());
-    assertEquals("alergias", resultado.get().getAlergias());
-    assertEquals("enfermedad", resultado.get().getEnfermedad());
-    assertEquals("queMedicamentoEstaTomando", resultado.get().getQueMedicamentoEstaTomando());
-
-    assertEquals("medico", resultado.get().getNombreMedico());
-    assertEquals("22222222-2", resultado.get().getRunMedico());
-
-    assertEquals("procedimiento", resultado.getProcedimiento());
-    assertEquals("odontograma", resultado.getOdontograma());
-
+        assertEquals("11111111-1", resultado.get().getRunPaciente());
+        assertEquals("paciente", resultado.get().getNombrePaciente());
+        assertEquals("22222222-2", resultado.get().getRunMedico());
+        assertEquals("medico", resultado.get().getNombreMedico());
+        assertEquals("procedimiento", resultado.get().getProcedimiento());
+        assertEquals("queMedicamentoEstaTomando", resultado.get().getQueMedicamentoEstaTomando());
+        assertEquals("enfermedad", resultado.get().getEnfermedad());
+        assertEquals("alergias", resultado.get().getAlergias());
+        assertEquals("odontograma", resultado.get().getOdontograma());
     }
 
     @Test
     void debeListarFichaMedica() {
-        repository.save(new FichaMedica(        
-            1L, "paciente","11111111-1",
-         "medico","22222222-2","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma"));
-        
-    repository.save(new FichaMedica(        
-             1L, "paciente","11111111-1",
-         "medico","22222222-2","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma"));
+        repository.save(new FichaMedica(
+                null, 
+                "11111111-1", 
+                "paciente",
+                "22222222-2", 
+                "medico", 
+                "procedimiento",
+                "queMedicamentoEstaTomando", 
+                "enfermedad",
+                "alergias", 
+                "odontograma"
+            )
+        );
+
+        repository.save(new FichaMedica(
+                null, 
+                "33333333-3", 
+                "paciente2",
+                "44444444-4", 
+                "medico2", 
+                "procedimiento2",
+                "queMedicamentoEstaTomando2", 
+                "enfermedad2",
+                "alergias2", 
+                "odontograma2"
+            )
+        );
 
         List<FichaMedica> resultado = repository.findAll();
 
@@ -93,11 +117,19 @@ public class FichaMedicaRepositoryTest {
 
     @Test
     void debeEliminarFichaMedica() {
-        FichaMedica fichaMedica = new FichaMedica(      
-            1L, "paciente","11111111-1",
-         "medico","22222222-2","procedimiento",
-    "queMedicamentoEstaTomando", "enfermedad",
-    "alergias","odontograma");
+        // CORRECCIÓN 8: id debe ser null para que JPA lo genere
+        FichaMedica fichaMedica = new FichaMedica(
+                null, 
+                "11111111-1", 
+                "paciente",
+                "22222222-2", 
+                "medico", 
+                "procedimiento",
+                "queMedicamentoEstaTomando", 
+                "enfermedad",
+                "alergias", 
+                "odontograma"
+            );
 
         FichaMedica guardado = repository.save(fichaMedica);
 
