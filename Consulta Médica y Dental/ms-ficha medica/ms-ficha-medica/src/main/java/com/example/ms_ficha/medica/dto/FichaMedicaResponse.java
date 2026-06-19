@@ -15,9 +15,6 @@ public class FichaMedicaResponse {
     private PacienteResponse paciente;
     private MedicoResponse medico;
     private String procedimiento;
-    private String queMedicamentoEstaTomando;
-    private String enfermedad;
-    private String alergias;
     private String odontograma;
 }
 
