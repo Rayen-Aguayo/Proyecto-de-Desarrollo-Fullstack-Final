@@ -21,7 +21,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-// CORRECCIÓN 1: apuntaba a RecetaMedicaController
 @WebMvcTest(MedicoController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -30,11 +29,9 @@ public class MedicoControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    // CORRECCIÓN 2: objectMapper faltaba declarar
     @Autowired
     private ObjectMapper objectMapper;
 
-    // CORRECCIÓN 3: "Service" (mayúscula) pero se usaba como "service" (minúscula)
     @MockitoBean
     private MedicoService service;
 
@@ -66,15 +63,12 @@ public class MedicoControllerTest {
 
     @Test
     void debeListarMedico() throws Exception {
-        // CORRECCIÓN 4: List.of() tenía strings sueltos en vez de objetos Medico
         when(service.listar()).thenReturn(List.of(buildMedico()));
 
-        // CORRECCIÓN 5: URL sin "/" inicial
         mockMvc.perform(get("/api/v1/medicos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Listado obtenido"))
-                // CORRECCIÓN 6: jsonPath debe coincidir con los campos reales del modelo Medico
                 .andExpect(jsonPath("$.data[0].runMedico").value("22222222-2"))
                 .andExpect(jsonPath("$.data[0].nombreMedico").value("Dra. Soto"))
                 .andExpect(jsonPath("$.data[0].edad").value(28))
@@ -90,18 +84,17 @@ public class MedicoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Medico obtenido"))
-                // CORRECCIÓN 7: obtener devuelve objeto único → $.data (no $.data[0])
                 .andExpect(jsonPath("$.data.runMedico").value("22222222-2"))
                 .andExpect(jsonPath("$.data.nombreMedico").value("Dra. Soto"))
                 .andExpect(jsonPath("$.data.edad").value(28))
                 .andExpect(jsonPath("$.data.nroTelefono").value("987654321"))
                 .andExpect(jsonPath("$.data.especialidad").value("cirujano"));
+
+        verify(service, times(1)).obtener("22222222-2");
     }
 
     @Test
     void debeCrearMedico() throws Exception {
-        // CORRECCIÓN 8: creado tenía datos de Paciente en vez de Medico
-        // CORRECCIÓN 9: any(PacienteDTO.class) → any(MedicoDTO.class)
         when(service.crear(any(MedicoDTO.class))).thenReturn(buildMedico());
 
         mockMvc.perform(post("/api/v1/medicos")
@@ -118,7 +111,6 @@ public class MedicoControllerTest {
 
     @Test
     void debeActualizarMedico() throws Exception {
-        // CORRECCIÓN 10: any(PacienteDTO.class) → any(MedicoDTO.class)
         when(service.actualizar(eq("22222222-2"), any(MedicoDTO.class))).thenReturn(buildMedico());
 
         mockMvc.perform(put("/api/v1/medicos/22222222-2")
@@ -140,7 +132,6 @@ public class MedicoControllerTest {
         mockMvc.perform(delete("/api/v1/medicos/22222222-2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                // CORRECCIÓN 11: "MEdico eliminado" tenía mayúscula incorrecta
                 .andExpect(jsonPath("$.message").value("Medico eliminado"));
     }
 }

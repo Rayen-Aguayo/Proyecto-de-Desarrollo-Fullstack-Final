@@ -28,12 +28,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import org.springframework.hateoas.EntityModel;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
-
 @Tag(name = "Medicos", description = "Operaciones relacionadas con Medicos")
 @RestController
-@RequestMapping("api/v1/medicos")
+@RequestMapping("/api/v1/medicos")
 @RequiredArgsConstructor
 public class MedicoController {
     private final MedicoService medicoService;
@@ -48,13 +45,12 @@ public class MedicoController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado (Se requiere rol ADMIN)")
     })
-
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Medico>> crear(@Valid @RequestBody MedicoDTO dto) {
 
         Medico medico = medicoService.crear(dto);
-         return ResponseEntity.status(201).body(
+        return ResponseEntity.status(201).body(
                 ApiResponse.<Medico>builder()
                         .success(true)
                         .message("Medico creado")
@@ -72,7 +68,6 @@ public class MedicoController {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado")
     })
-    
     @GetMapping
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<List<Medico>>> listar() {
@@ -87,44 +82,28 @@ public class MedicoController {
     }
 
     @Operation(
-        summary = "Listar Medicos",
-        description = "Retorna todos los autores registrados. Requiere rol USER o ADMIN."
+        summary = "Obtener Medico por Run",
+        description = "Busca y retorna los datos de un médico mediante su identificador único (RUN). Requiere rol USER o ADMIN."
     )
     @ApiResponses(value = {
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "medico/a obtenido"),
         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado")
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Medico/a no encontrada")
     })
-
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ApiResponse<Medico>> obtener(
-        @Parameter(description = "Identificador único del médico (RUN)", example = "12345678-9")
-        @PathVariable String id,           
-        @RequestHeader("Authorization") String token) {
+            @Parameter(description = "Identificador único del médico (RUN)", example = "12345678-9")
+            @PathVariable String id) {
 
         Medico medico = medicoService.obtener(id);
-
-        EntityModel<Medico> recurso = EntityModel.of(medico);
-
-        recurso.add(
-                linkTo(methodOn(MedicoController.class).listar())
-                        .withRel("all"));
-
-        recurso.add(
-                linkTo(methodOn(MedicoController.class).actualizar(id, null))
-                        .withRel("update"));
-        recurso.add(
-                linkTo(methodOn(MedicoController.class).crear(null))
-                        .withRel("create"));
-        
-        recurso.add(
-                linkTo(methodOn(MedicoController.class).eliminar(id))
-                        .withRel("delete"));
 
         return ResponseEntity.ok(
                 ApiResponse.<Medico>builder()
                         .success(true)
                         .message("Medico obtenido")
-                        .data(medicoService.obtener(id))
+                        .data(medico)
                         .build()
         );
     }
@@ -140,13 +119,12 @@ public class MedicoController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Medico/a no encontrada")
     })
-
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Medico>> actualizar(
-        @Parameter(description = "Identificador único del médico (RUN)", example = "12345678-9")
-        @PathVariable String id,           
-        @RequestHeader("Authorization") MedicoDTO dto){
+            @Parameter(description = "Identificador único del médico (RUN)", example = "12345678-9")
+            @PathVariable String id,
+            @Valid @RequestBody MedicoDTO dto) {
 
         Medico medico = medicoService.actualizar(id, dto);
 
@@ -169,11 +147,10 @@ public class MedicoController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Medico/a no encontrada")
     })
-
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> eliminar(
-            @Parameter(description = "Identificador único de la ficha médica", example = "1")
+            @Parameter(description = "Identificador único del médico (RUN)", example = "12345678-9")
             @PathVariable String id) {
 
         medicoService.eliminar(id);
@@ -186,4 +163,3 @@ public class MedicoController {
         );
     }
 }
-
