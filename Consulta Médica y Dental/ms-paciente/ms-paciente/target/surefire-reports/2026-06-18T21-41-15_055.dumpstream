@@ -1,0 +1,5 @@
+# Created at 2026-06-18T21:41:15.240
+Boot Manifest-JAR contains absolute paths in classpath 'D:\Proyecto-de-Desarrollo-Fullstack-Final\Consulta Médica y Dental\ms-paciente\ms-paciente\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+
