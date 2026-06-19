@@ -1,130 +1,174 @@
 package com.example.ms_registro.de.materiales.repository;
 
-
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.test.context.ActiveProfiles;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@DataJpaTest
-@ActiveProfiles("test")
-class RegistroAtencionesRepositoryTest {
+import com.example.ms_registro.de.materiales.dto.RegistroMaterialesDTO;
+import com.example.ms_registro.de.materiales.model.RegistroMateriales;
+import com.example.ms_registro.de.materiales.service.RegistroMaterialesService;
 
-    @Autowired
-    private RegistroAtencionesRepository repository;
+import jakarta.persistence.EntityNotFoundException;
+
+@ExtendWith(MockitoExtension.class)
+public class RegistroMaterialesRepositoryTest {
+
+    @Mock
+    private RegistroMaterialesRepository repository;
+
+    @InjectMocks
+    private RegistroMaterialesService service;
 
     @Test
-    void debeGuardarRegistroDeAtencion() {
-        RegistroAtenciones registro = new RegistroAtenciones(
-                null,
-                "Juan Pérez",
-                "11111111-1",
-                "Dra. Soto",
-                "22222222-2",
-                45000.0,
-                1,
-                LocalDate.of(2026, 6, 20),
-                LocalTime.of(10, 30),
-                "Extracción Molar"
+    void deberiaCrearRegistroDeAtencionCorrectamente() {
+        //Arrange
+        RegistroMaterialesDTO dto = new RegistroMaterialesDTO();
+        dto.setCantidadProductos(10);
+        dto.setNombresProductos("Guantes, Mascarillas");
+        dto.setFechaCaducidadProductos(LocalDate.of(2027, 1, 1));
+
+        when(repository.save(any(RegistroMateriales.class))).thenReturn(
+            new RegistroMateriales(
+                1L, 10,
+                "Guantes, Mascarillas",
+                LocalDate.of(2027, 1, 1)
+            )
         );
 
-        RegistroAtenciones guardado = repository.save(registro);
+        RegistroMateriales resultado = service.crear(dto);
 
-        assertNotNull(guardado.getId());
-        assertEquals("Juan Pérez",       guardado.getNompaciente());
-        assertEquals("11111111-1",        guardado.getRunpaciente());
-        assertEquals("Dra. Soto",         guardado.getNommedico());
-        assertEquals("22222222-2",        guardado.getRunmedico());
-        assertEquals(45000.0,             guardado.getTotal());
-        assertEquals(1,                   guardado.getIdPago());
-        assertEquals("Extracción Molar",  guardado.getTratamientoRealizado());
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(1L, resultado.getId());
+        assertEquals(10, resultado.getCantidadProductos());
+        assertEquals("Guantes, Mascarillas", resultado.getNombresProductos());
+        assertEquals(LocalDate.of(2027, 1, 1), resultado.getFechaCaducidadProductos());
+        verify(repository).save(any(RegistroMateriales.class));
     }
 
     @Test
-    void debeBuscarRegistroPorId() {
-        RegistroAtenciones registro = new RegistroAtenciones(
-                null,
-                "María López",
-                "33333333-3",
-                "Dr. Rojas",
-                "44444444-4",
-                30000.0,
-                2,
-                LocalDate.of(2026, 7, 1),
-                LocalTime.of(9, 0),
-                "Control Dental"
-        );
+    void deberiaRetornarListaDeMateriales() {
+        // Arrange
+        when(repository.findAll()).thenReturn(List.of(
+            new RegistroMateriales(
+                1L, 10,
+                "Guantes, Mascarillas",
+                LocalDate.of(2027, 1, 1)
+            )
+        )
+    );
 
-        RegistroAtenciones guardado = repository.save(registro);
+        // Act
+        List<RegistroMateriales> resultado = service.listar();
 
-        Optional<RegistroAtenciones> resultado = repository.findById(guardado.getId());
-
-        assertTrue(resultado.isPresent());
-        assertEquals("María López", resultado.get().getNompaciente());
-        assertEquals("Dr. Rojas",   resultado.get().getNommedico());
-    }
-
-    @Test
-    void debeListarRegistrosDeAtenciones() {
-        repository.save(new RegistroAtenciones(
-                null,
-                "Pedro Díaz",
-                "55555555-5",
-                "Dra. Fuentes",
-                "66666666-6",
-                20000.0,
-                3,
-                LocalDate.of(2026, 6, 22),
-                LocalTime.of(11, 0),
-                "Urgencia Dental"
-        ));
-        
-        repository.save(new RegistroAtenciones(
-                null,
-                "Ana Torres",
-                "77777777-7",
-                "Dr. Muñoz",
-                "88888888-8",
-                15000.0,
-                4,
-                LocalDate.of(2026, 6, 23),
-                LocalTime.of(15, 30),
-                "Consulta General"
-        ));
-
-        List<RegistroAtenciones> resultado = repository.findAll();
-
+        // Assert
         assertFalse(resultado.isEmpty());
-        assertTrue(resultado.size() >= 2);
+        assertEquals(1, resultado.size());
+        assertEquals("Guantes, Mascarillas", resultado.get(0).getNombresProductos());
+        verify(repository).findAll();
     }
 
     @Test
-    void debeEliminarRegistroDeAtencion() {
-        RegistroAtenciones registro = new RegistroAtenciones(
-                null,
-                "Carlos Vidal",
-                "99999999-9",
-                "Dra. Castro",
-                "10101010-1",
-                50000.0,
-                5,
-                LocalDate.of(2026, 8, 5),
-                LocalTime.of(16, 0),
-                "Control Médico"
+    void deberiaRetornarMaterialesCuandoExiste() {
+        // Arrange
+        when(repository.findById(1L)).thenReturn(Optional.of(
+            new RegistroMateriales(
+                1L, 10,
+                "Guantes, Mascarillas",
+                LocalDate.of(2027, 1, 1)
+            )
+        )
+    );
+
+        //Act
+        RegistroMateriales resultado = service.obtener(1L);
+
+        //Assert
+        assertNotNull(resultado);
+        assertEquals(1L, resultado.getId());
+        assertEquals("Guantes, Mascarillas", resultado.getNombresProductos());
+        verify(repository).findById(1L);
+    }
+
+    @Test
+    void deberiaLanzarExcepcionesCuandoMaterialesNoExiste() {
+        // Arrange
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        //Act + Assert
+        EntityNotFoundException ex = assertThrows(
+            EntityNotFoundException.class,
+            () -> service.obtener(99L)
         );
 
-        RegistroAtenciones guardado = repository.save(registro);
+        assertEquals("registro de materiales no encontrado", ex.getMessage());
+        verify(repository).findById(99L);
+    }
 
-        repository.deleteById(guardado.getId());
+    @Test
+    void deberiaActualizarMaterialCorrectamente() {
+        //Arrange
+        RegistroMaterialesDTO dto = new RegistroMaterialesDTO();
+        dto.setCantidadProductos(20);
+        dto.setNombresProductos("Jeringas");
+        dto.setFechaCaducidadProductos(LocalDate.of(2028, 6, 1));
 
-        Optional<RegistroAtenciones> resultado = repository.findById(guardado.getId());
-        assertFalse(resultado.isPresent());
+        RegistroMateriales existente = new RegistroMateriales(
+            1L, 10,
+            "Guantes, Mascarillas",
+            LocalDate.of(2027, 1, 1)
+        );
+
+        when(repository.findById(1L)).thenReturn(Optional.of(existente));
+        when(repository.save(any(RegistroMateriales.class))).thenAnswer(inv -> inv.getArgument(0));
+        
+        // Act
+        RegistroMateriales resultado = service.actualizar(1L, dto);
+
+        // Assert
+        assertEquals(20, resultado.getCantidadProductos());
+        assertEquals("Jeringas", resultado.getNombresProductos());
+        assertEquals(LocalDate.of(2028, 6, 1), resultado.getFechaCaducidadProductos());
+        verify(repository).findById(1L);
+        verify(repository).save(existente);
+    }
+
+    @Test
+    void deberiaLanzarExcepcionAlActualizarSiMaterialNoExiste() {
+        // Arrange
+        RegistroMaterialesDTO dto = new RegistroMaterialesDTO();
+        dto.setCantidadProductos(20);
+        dto.setNombresProductos("Jeringas");
+        dto.setFechaCaducidadProductos(LocalDate.of(2028, 6, 1));
+
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        // Act + Assert
+        EntityNotFoundException ex = assertThrows(
+                EntityNotFoundException.class,
+                () -> service.actualizar(99L, dto)
+        );
+
+        assertEquals("registro de materiales no encontrado", ex.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void deberiaEliminarRegistroPorId() {
+        doNothing().when(repository).deleteById(1L);
+
+        service.eliminar(1L);
+
+        verify(repository).deleteById(1L);
     }
 }
