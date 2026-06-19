@@ -1,6 +1,7 @@
 package com.example.ms_reserva.y.anular.hora.controller;
 
 import com.example.ms_reserva.y.anular.hora.dto.*;
+import com.example.ms_reserva.y.anular.hora.security.JwtUtil;
 import com.example.ms_reserva.y.anular.hora.service.PedirHoraService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -32,6 +33,9 @@ class PedirHoraControllerTest {
 
     @MockitoBean
     private PedirHoraService pedirHoraService;
+
+    @MockitoBean
+    private JwtUtil jwtUtil;
 
     @Test
     void debeListarReservas() throws Exception {
