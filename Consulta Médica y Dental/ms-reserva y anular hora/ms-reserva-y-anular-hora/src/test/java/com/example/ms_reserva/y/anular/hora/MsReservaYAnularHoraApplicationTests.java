@@ -1,13 +1,12 @@
 package com.example.ms_reserva.y.anular.hora;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class MsReservaYAnularHoraApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {
+        // Test vacío: el contexto completo requiere MySQL.
+        // Los tests reales están en PedirHoraControllerTest y PedirHoraServiceTest.
+    }
 }
