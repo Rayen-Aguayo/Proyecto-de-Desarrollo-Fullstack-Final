@@ -38,6 +38,8 @@ public class OpinionPacienteControllerTest {
     @MockitoBean
     private JwtUtil jwtUtil;
 
+    private static final String BASE_URL = "/api/v1/opiniones";
+
     // Helper para construir el response reutilizable
     private OpinionPacienteResponse buildResponse() {
         PacienteResponse paciente = new PacienteResponse();
@@ -49,8 +51,8 @@ public class OpinionPacienteControllerTest {
 
         return OpinionPacienteResponse.builder()
                 .id(1L)
-                .paciente(paciente)   // campo es .paciente(), no .runPaciente()
-                .medico(medico)       // campo es .medico(), no .nombreMedico()
+                .paciente(paciente)
+                .medico(medico)
                 .atencionMedico(8)
                 .expliqueSuPuntuacion("muy amable")
                 .explicacionTratamiento("bastante claro")
@@ -77,10 +79,11 @@ public class OpinionPacienteControllerTest {
     void debeListarOpinionPaciente() throws Exception {
         when(service.listar(anyString())).thenReturn(List.of(buildResponse()));
 
-        mockMvc.perform(get("/api/v1/opinion-paciente")
+        mockMvc.perform(get(BASE_URL)
                         .header("Authorization", "Bearer token-de-prueba"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Listado de opiniones obtenido"))
                 .andExpect(jsonPath("$.data[0].id").value(1))
                 .andExpect(jsonPath("$.data[0].paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data[0].medico.nombreMedico").value("Dra. Soto"))
@@ -92,14 +95,18 @@ public class OpinionPacienteControllerTest {
     void debeObtenerOpinionPacientePorId() throws Exception {
         when(service.obtener(eq(1L), anyString())).thenReturn(buildResponse());
 
-        mockMvc.perform(get("/api/v1/opinion-paciente/1")
+        mockMvc.perform(get(BASE_URL + "/1")
                         .header("Authorization", "Bearer token-de-prueba"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Detalle de la opinión obtenido"))
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"))
                 .andExpect(jsonPath("$.data.atencionMedico").value(8));
+
+        // El controller corregido llama al servicio una sola vez
+        verify(service, times(1)).obtener(eq(1L), anyString());
     }
 
     @Test
@@ -109,13 +116,13 @@ public class OpinionPacienteControllerTest {
 
         when(service.crear(any(OpinionPacienteDTO.class), anyString())).thenReturn(buildResponse());
 
-        mockMvc.perform(post("/api/v1/opinion-paciente")
+        mockMvc.perform(post(BASE_URL)
                         .header("Authorization", "Bearer token-de-prueba")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(buildDTO())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Opinion del paciente creada"))
+                .andExpect(jsonPath("$.message").value("Opinión registrada exitosamente"))
                 .andExpect(jsonPath("$.data.id").value(1))
                 .andExpect(jsonPath("$.data.paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"));
@@ -129,13 +136,13 @@ public class OpinionPacienteControllerTest {
         when(service.actualizar(eq(1L), any(OpinionPacienteDTO.class), anyString()))
                 .thenReturn(buildResponse());
 
-        mockMvc.perform(put("/api/v1/opinion-paciente/1")
+        mockMvc.perform(put(BASE_URL + "/1")
                         .header("Authorization", "Bearer token-de-prueba")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(mapper.writeValueAsString(buildDTO())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Opinion del paciente actualizada"))
+                .andExpect(jsonPath("$.message").value("Opinión actualizada exitosamente"))
                 .andExpect(jsonPath("$.data.paciente.runPaciente").value("11111111-1"))
                 .andExpect(jsonPath("$.data.medico.nombreMedico").value("Dra. Soto"));
     }
@@ -144,9 +151,9 @@ public class OpinionPacienteControllerTest {
     void debeEliminarOpinionPaciente() throws Exception {
         doNothing().when(service).eliminar(1L);
 
-        mockMvc.perform(delete("/api/v1/opinion-paciente/1"))
+        mockMvc.perform(delete(BASE_URL + "/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Opinion del paciente eliminada"));
+                .andExpect(jsonPath("$.message").value("La opinión ha sido eliminada"));
     }
 }
