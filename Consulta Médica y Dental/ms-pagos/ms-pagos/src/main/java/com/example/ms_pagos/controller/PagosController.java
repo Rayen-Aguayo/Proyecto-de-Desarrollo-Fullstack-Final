@@ -1,158 +1,289 @@
 package com.example.ms_pagos.controller;
 
+import com.example.ms_pagos.dto.*;
+import com.example.ms_pagos.exception.GlobalExceptionHandler;
+import com.example.ms_pagos.security.JwtUtil;
+import com.example.ms_pagos.service.PagosService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
-import org.springframework.hateoas.EntityModel;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.ms_pagos.dto.ApiResponse;
-import com.example.ms_pagos.dto.PagosDTO;
-import com.example.ms_pagos.dto.PagosResponse;
-import com.example.ms_pagos.service.PagosService;
+@WebMvcTest(PagosController.class)
+@Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
+class PagosControllerTest {
 
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+    @Autowired
+    private MockMvc mockMvc;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
+    @MockitoBean
+    private PagosService pagosService;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+    @MockitoBean
+    private JwtUtil jwtUtil;
 
-@Tag(name = "Pagos", description = "Operaciones relacionadas con la gestión de pagos")
-@RestController
-@RequestMapping("/api/v1/pagos")
-@RequiredArgsConstructor
-public class PagosController {
+    @Test
+    void debeListarPagos() throws Exception {
+        PacienteResponse paciente = new PacienteResponse();
+        paciente.setRunPaciente("11111111-1");
+        paciente.setNombrePaciente("Juan Pérez");
 
-    private final PagosService pagosService;
+        PagosResponse response = PagosResponse.builder()
+                .id(1L)
+                .paciente(paciente)
+                .fecha(LocalDate.of(2026, 6, 20))
+                .hora(LocalTime.of(10, 30))
+                .metodoPago("Transferencia")
+                .nroBoleta(1001)
+                .registroFacturacion("FAC-001")
+                .neto(42017.0)
+                .iva(7983.0)
+                .total(50000.0)
+                .estado("PAGADO")
+                .build();
 
-    @Operation(
-    summary = "Crear pago",
-    description = "Crea un nuevo pago. Requiere rol ADMIN."
-    )
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Pago creado correctamente"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
-    })  
-    
-    @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<ApiResponse<PagosResponse>> crear(
-            @Valid @RequestBody PagosDTO dto,
-            @RequestHeader("Authorization") String token) {
+        when(pagosService.listar(anyString())).thenReturn(List.of(response));
 
-        return ResponseEntity.status(201).body(
-                ApiResponse.<PagosResponse>builder()
-                        .success(true)
-                        .message("Pago registrado")
-                        .data(pagosService.crear(dto, token))
-                        .build()
-        );
+        mockMvc.perform(get("/api/v1/pagos")
+                        .header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].id").value(1))
+                .andExpect(jsonPath("$.data[0].estado").value("PAGADO"))
+                .andExpect(jsonPath("$.data[0].paciente.nombrePaciente").value("Juan Pérez"));
     }
 
-        @Operation(
-            summary = "Listar pagos",
-            description = "Retorna todos los pagos del sistema. Requiere rol ADMIN."
-        )
-        @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Listado obtenido correctamente"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado")
-        })
+    @Test
+    void debeObtenerPagoPorId() throws Exception {
+        PacienteResponse paciente = new PacienteResponse();
+        paciente.setRunPaciente("11111111-1");
+        paciente.setNombrePaciente("Juan Pérez");
 
-    @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<ApiResponse<List<PagosResponse>>> listar(
-            @RequestHeader("Authorization") String token) {
+        PagosResponse response = PagosResponse.builder()
+                .id(1L)
+                .paciente(paciente)
+                .fecha(LocalDate.of(2026, 6, 20))
+                .hora(LocalTime.of(10, 30))
+                .metodoPago("Transferencia")
+                .nroBoleta(1001)
+                .registroFacturacion("FAC-001")
+                .neto(42017.0)
+                .iva(7983.0)
+                .total(50000.0)
+                .estado("PAGADO")
+                .build();
 
-        return ResponseEntity.ok(
-                ApiResponse.<List<PagosResponse>>builder()
-                        .success(true)
-                        .data(pagosService.listar(token))
-                        .build()
-        );
+        when(pagosService.obtener(eq(1L), anyString())).thenReturn(response);
+
+        mockMvc.perform(get("/api/v1/pagos/1")
+                        .header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.estado").value("PAGADO"))
+                .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"));
     }
-    
-    @Operation(
-        summary = "Obtener pago por ID",
-        description = "Busca un pago específico utilizando su identificador único. Requiere rol ADMIN."
-    )
-        @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Pago obtenido exitosamente"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado")
-    })
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<ApiResponse<PagosResponse>> obtener(
-            @Parameter(description = "ID del pago", example = "1")
-            @PathVariable Long id,
-            @RequestHeader("Authorization") String token) {
-        
-        PagosResponse pagosResponse = pagosService.obtener(id, token);
+    @Test
+    void debeCrearPago() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
+        PagosDTO dto = new PagosDTO();
+        dto.setRunPaciente("11111111-1");
+        dto.setNombrePaciente("Juan Pérez");
+        dto.setFecha(LocalDate.of(2026, 6, 20));
+        dto.setHora(LocalTime.of(10, 30));
+        dto.setMetodoPago("Transferencia");
+        dto.setNroBoleta(1001);
+        dto.setRegistroFacturacion("FAC-001");
+        dto.setNeto(42017.0);
+        dto.setIva(7983.0);
+        dto.setTotal(50000.0);
+        dto.setEstado("PAGADO");
 
-        EntityModel<PagosResponse> recurso = EntityModel.of(pagosResponse);
+        PacienteResponse paciente = new PacienteResponse();
+        paciente.setRunPaciente("11111111-1");
+        paciente.setNombrePaciente("Juan Pérez");
 
+        PagosResponse response = PagosResponse.builder()
+                .id(1L)
+                .paciente(paciente)
+                .fecha(LocalDate.of(2026, 6, 20))
+                .hora(LocalTime.of(10, 30))
+                .metodoPago("Transferencia")
+                .nroBoleta(1001)
+                .registroFacturacion("FAC-001")
+                .neto(42017.0)
+                .iva(7983.0)
+                .total(50000.0)
+                .estado("PAGADO")
+                .build();
 
-        recurso.add(
-                linkTo(methodOn(PagosController.class).listar(token))
-                        .withRel("all")
-        );
+        when(pagosService.crear(any(PagosDTO.class), anyString())).thenReturn(response);
 
-        recurso.add(
-                linkTo(methodOn(PagosController.class).actualizar(id, null, token))
-                        .withRel("update")
-        );
-
-
-
-        return ResponseEntity.ok(
-                ApiResponse.<PagosResponse>builder()
-                        .success(true)
-                        .data(pagosService.obtener(id, token))
-                        .build()
-        );
+        mockMvc.perform(post("/api/v1/pagos")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Pago registrado"))
+                .andExpect(jsonPath("$.data.id").value(1))
+                .andExpect(jsonPath("$.data.estado").value("PAGADO"))
+                .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"));
     }
-    @Operation(
-        summary = "Actualizar el pago por su ID",
-        description = "Actualiza la información de un pago existente. Requiere rol ADMIN."
-    )
-    @ApiResponses(value = {
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Pago actualizado"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Pago no encontrado"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "401", description = "No autenticado o token inválido"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = "Acceso denegado")
-    })
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<ApiResponse<PagosResponse>> actualizar(
-            @PathVariable Long id,
-            @Valid @RequestBody PagosDTO dto,
-            @RequestHeader("Authorization") String token) {
+    @Test
+    void debeActualizarPago() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
-        return ResponseEntity.ok(
-                ApiResponse.<PagosResponse>builder()
-                        .success(true)
-                        .message("Pago actualizado")
-                        .data(pagosService.actualizar(id, dto, token))
-                        .build()
-        );
+        PagosDTO dto = new PagosDTO();
+        dto.setRunPaciente("11111111-1");
+        dto.setNombrePaciente("Juan Pérez");
+        dto.setFecha(LocalDate.of(2026, 6, 25));
+        dto.setHora(LocalTime.of(11, 0));
+        dto.setMetodoPago("Efectivo");
+        dto.setNroBoleta(1002);
+        dto.setRegistroFacturacion("FAC-002");
+        dto.setNeto(42017.0);
+        dto.setIva(7983.0);
+        dto.setTotal(50000.0);
+        dto.setEstado("PENDIENTE");
+
+        PacienteResponse paciente = new PacienteResponse();
+        paciente.setRunPaciente("11111111-1");
+        paciente.setNombrePaciente("Juan Pérez");
+
+        PagosResponse response = PagosResponse.builder()
+                .id(1L)
+                .paciente(paciente)
+                .fecha(LocalDate.of(2026, 6, 25))
+                .hora(LocalTime.of(11, 0))
+                .metodoPago("Efectivo")
+                .nroBoleta(1002)
+                .registroFacturacion("FAC-002")
+                .neto(42017.0)
+                .iva(7983.0)
+                .total(50000.0)
+                .estado("PENDIENTE")
+                .build();
+
+        when(pagosService.actualizar(eq(1L), any(PagosDTO.class), anyString())).thenReturn(response);
+
+        mockMvc.perform(put("/api/v1/pagos/1")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Pago actualizado"))
+                .andExpect(jsonPath("$.data.estado").value("PENDIENTE"))
+                .andExpect(jsonPath("$.data.paciente.nombrePaciente").value("Juan Pérez"));
+    }
+
+    @Test
+    void debeRetornar404AlObtenerPagoInexistente() throws Exception {
+        when(pagosService.obtener(eq(999L), anyString()))
+                .thenThrow(new RuntimeException("Pago no encontrado"));
+
+        mockMvc.perform(get("/api/v1/pagos/999")
+                        .header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Pago no encontrado"));
+    }
+
+    @Test
+    void debeRetornar404AlActualizarPagoInexistente() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        // DTO completo y válido para que pase la validación y llegue al service
+        PagosDTO dto = new PagosDTO();
+        dto.setRunPaciente("11111111-1");
+        dto.setNombrePaciente("Juan Pérez");
+        dto.setFecha(LocalDate.of(2026, 6, 25));
+        dto.setHora(LocalTime.of(11, 0));
+        dto.setMetodoPago("Efectivo");
+        dto.setNroBoleta(1002);
+        dto.setRegistroFacturacion("FAC-002");
+        dto.setNeto(42017.0);
+        dto.setIva(7983.0);
+        dto.setTotal(50000.0);
+        dto.setEstado("PENDIENTE");
+
+        when(pagosService.actualizar(eq(999L), any(PagosDTO.class), anyString()))
+                .thenThrow(new RuntimeException("Pago no encontrado"));
+
+        mockMvc.perform(put("/api/v1/pagos/999")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Pago no encontrado"));
+    }
+
+    @Test
+    void debeRetornar400AlCrearPagoConCamposNulos() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        PagosDTO dto = new PagosDTO();
+
+        mockMvc.perform(post("/api/v1/pagos")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Validación fallida"));
+    }
+
+    @Test
+    void debeRetornar400AlActualizarPagoConCamposNulos() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
+        PagosDTO dto = new PagosDTO();
+
+        mockMvc.perform(put("/api/v1/pagos/1")
+                        .header("Authorization", "Bearer token-de-prueba")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Validación fallida"));
+    }
+
+    @Test
+    void debeRetornarListaVaciaAlNoHaberPagos() throws Exception {
+        when(pagosService.listar(anyString())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/pagos")
+                        .header("Authorization", "Bearer token-de-prueba"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data").isEmpty());
     }
 }
