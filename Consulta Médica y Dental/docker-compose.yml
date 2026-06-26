@@ -1,0 +1,473 @@
+﻿services:
+
+  # --- BASES DE DATOS ---
+
+  mysql-auth:
+    image: mysql:8.0
+    container_name: mysql-auth
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms-user
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-auth-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-facturacion:
+    image: mysql:8.0
+    container_name: mysql-facturacion
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_facturacion_y_Presupuesto
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-facturacion-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-ficha:
+    image: mysql:8.0
+    container_name: mysql-ficha
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_ficha_medica
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql-ficha-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-medico:
+    image: mysql:8.0
+    container_name: mysql-medico
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_medico
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysql-medico-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-opinion:
+    image: mysql:8.0
+    container_name: mysql-opinion
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_opinion_del_paciente
+    ports:
+      - "3311:3306"
+    volumes:
+      - mysql-opinion-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-paciente:
+    image: mysql:8.0
+    container_name: mysql-paciente
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_paciente
+    ports:
+      - "3312:3306"
+    volumes:
+      - mysql-paciente-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-pagos:
+    image: mysql:8.0
+    container_name: mysql-pagos
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_pagos
+    ports:
+      - "3313:3306"
+    volumes:
+      - mysql-pagos-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-receta:
+    image: mysql:8.0
+    container_name: mysql-receta
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_receta_medica
+    ports:
+      - "3314:3306"
+    volumes:
+      - mysql-receta-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-atenciones:
+    image: mysql:8.0
+    container_name: mysql-atenciones
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_registros_de_atenciones
+    ports:
+      - "3315:3306"
+    volumes:
+      - mysql-atenciones-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-materiales:
+    image: mysql:8.0
+    container_name: mysql-materiales
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_registro_de_materiales
+    ports:
+      - "3316:3306"
+    volumes:
+      - mysql-materiales-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-reserva:
+    image: mysql:8.0
+    container_name: mysql-reserva
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: ms_reservar_y_anular_hora
+    ports:
+      - "3317:3306"
+    volumes:
+      - mysql-reserva-data:/var/lib/mysql
+    networks:
+      - consulta-medica-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # --- INFRAESTRUCTURA ---
+
+  ms-eureka:
+    build: ./ms-eureka
+    container_name: ms-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - consulta-medica-net
+
+  ms-gateway:
+    build: ./ms-gateway
+    container_name: ms-gateway
+    ports:
+      - "8091:8091"
+    environment:
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      - ms-eureka
+    networks:
+      - consulta-medica-net
+
+  # --- MICROSERVICIOS ---
+
+  ms-auth:
+    build: ./ms-auth
+    container_name: ms-auth
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mysql-auth
+      DB_PORT: 3306
+      DB_NAME: ms-user
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-auth:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-facturacion:
+    build: ./ms-facturación y presupuesto
+    container_name: ms-facturacion
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: mysql-facturacion
+      DB_PORT: 3306
+      DB_NAME: ms_facturacion_y_Presupuesto
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-facturacion:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-ficha-medica:
+    build: ./ms-ficha medica
+    container_name: ms-ficha-medica
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: mysql-ficha
+      DB_PORT: 3306
+      DB_NAME: ms_ficha_medica
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-ficha:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-medico:
+    build: ./ms-medico
+    container_name: ms-medico
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: mysql-medico
+      DB_PORT: 3306
+      DB_NAME: ms_medico
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-medico:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-opinion:
+    build: ./ms-opinión del paciente
+    container_name: ms-opinion
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: mysql-opinion
+      DB_PORT: 3306
+      DB_NAME: ms_opinion_del_paciente
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-opinion:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-paciente:
+    build: ./ms-paciente
+    container_name: ms-paciente
+    ports:
+      - "8085:8085"
+    environment:
+      DB_HOST: mysql-paciente
+      DB_PORT: 3306
+      DB_NAME: ms_paciente
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-paciente:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-pagos:
+    build: ./ms-pagos
+    container_name: ms-pagos
+    ports:
+      - "8086:8086"
+    environment:
+      DB_HOST: mysql-pagos
+      DB_PORT: 3306
+      DB_NAME: ms_pagos
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-pagos:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-receta-medica:
+    build: ./ms-receta medica
+    container_name: ms-receta-medica
+    ports:
+      - "8087:8087"
+    environment:
+      DB_HOST: mysql-receta
+      DB_PORT: 3306
+      DB_NAME: ms_receta_medica
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-receta:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-registro-atenciones:
+    build: ./ms-registro de atenciones
+    container_name: ms-registro-atenciones
+    ports:
+      - "8088:8088"
+    environment:
+      DB_HOST: mysql-atenciones
+      DB_PORT: 3306
+      DB_NAME: ms_registros_de_atenciones
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-atenciones:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-registro-materiales:
+    build: ./ms-registro de materiales
+    container_name: ms-registro-materiales
+    ports:
+      - "8089:8089"
+    environment:
+      DB_HOST: mysql-materiales
+      DB_PORT: 3306
+      DB_NAME: ms_registro_de_materiales
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-materiales:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+  ms-reserva:
+    build: ./ms-reserva y anular hora
+    container_name: ms-reserva
+    ports:
+      - "8090:8090"
+    environment:
+      DB_HOST: mysql-reserva
+      DB_PORT: 3306
+      DB_NAME: ms_reservar_y_anular_hora
+      DB_USER: root
+      DB_PASSWORD: root
+      JWT_SECRET: clave_super_secreta_12345678901234567890
+      EUREKA_URL: http://ms-eureka:8761/eureka/
+    depends_on:
+      mysql-reserva:
+        condition: service_healthy
+      ms-eureka:
+        condition: service_started
+    networks:
+      - consulta-medica-net
+
+volumes:
+  mysql-auth-data:
+  mysql-facturacion-data:
+  mysql-ficha-data:
+  mysql-medico-data:
+  mysql-opinion-data:
+  mysql-paciente-data:
+  mysql-pagos-data:
+  mysql-receta-data:
+  mysql-atenciones-data:
+  mysql-materiales-data:
+  mysql-reserva-data:
+
+networks:
+  consulta-medica-net:
+    driver: bridge
