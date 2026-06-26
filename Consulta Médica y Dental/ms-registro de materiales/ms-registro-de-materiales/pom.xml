@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>ms-reserva-y-anular-hora</artifactId>
+	<artifactId>ms-registro-de-materiales</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
